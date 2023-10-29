@@ -25,10 +25,12 @@ CREATE TABLE department (
 -- department_id: INT to hold reference to department role belongs to
 
 CREATE TABLE role (
-    id INT NOT NULL PRIMARY KEY,
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(30) NOT NULL,
-    salary DECIMAL NOT NULL,
-    department_id INT NOT NULL
+    salary DECIMAL (10, 2) NOT NULL,
+    department_id INT,
+    FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE SET NULL
+    
 );
 
 -- employee
@@ -39,9 +41,10 @@ CREATE TABLE role (
 -- manager_id: INT to hold reference to another employee that is the manager of the current employee (null if the employee has no manager)
 
 CREATE TABLE employee (
-    id INT PRIMARY KEY NOT NULL,
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL,
     role_id INT,
-    manager_id INT
+    manager_id INT,
+    FOREIGN KEY (role_id) REFERENCES role(id)
 );
