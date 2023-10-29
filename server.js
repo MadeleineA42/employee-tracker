@@ -7,13 +7,13 @@ const app = express();
 
 // Connecting the database
 const db = mysql.createConnection(
-    {
-      host: 'localhost',
-      user: 'root',
-      database: 'employee_db',
-      password: 'Mont@na456'
-    },
-    console.log(`Connected to employee database,`)
+  {
+    host: 'localhost',
+    user: 'root',
+    database: 'employee_db',
+    password: 'Mont@na456'
+  },
+  console.log(`Connected to employee database,`)
 );
 db.connect((err) => {
   if (err) {
@@ -30,24 +30,98 @@ db.connect((err) => {
 // add a role, 
 // add an employee, 
 // and update an employee role
-// function menuPrompt() {
-//     inquirer.prompt ({
-//         type: 'list',
-//         name: 'start',
-//         message: 'What would you like to do?',
-//         choices: [
-//             'View all department',
-//             'View all roles',
-//             'View all employees',
-//             'Add a department',
-//             'Add a role',
-//             'Add an employee',
-//             'Update and employee role',
-//             'Exit'
-//         ],
-//     })
+function menuPrompt() {
+  inquirer.prompt({
+    type: 'list',
+    name: 'start',
+    message: 'What would you like to do?',
+    choices: [
+      'View all departments',
+      'View all roles',
+      'View all employees',
+      'Add a department',
+      'Add a role',
+      'Add an employee',
+      'Update and employee role',
+      'Exit'
+    ]
+  }).then(answer => {
+    switch (answer.start) {
+      case 'View all departments':
+        viewDepartment();
+        break;
+
+      case 'View all roles':
+        viewRoles();
+        break;
+
+      case 'View all employees':
+        viewEmployees();
+        break;
+
+      case 'Add a department':
+        addDeparment();
+        break;
+
+      case 'Add a role':
+        addRole();
+        break;
+
+      case 'Add an employee':
+        addEmployee();
+        break;
+
+      case 'Update an employee role':
+        updateEmployeeRole();
+        break;
+
+      case 'Exit':
+        console.log('Goodbye!');
+        break;
+      default:
+        console.log('Invalid choice. Please try again.');
+    }
+  });
+}
+
+// function to view all departments 
+function viewDepartment() {
+  db.query('select * from department', (err, res) => {
+    console.log(err);
+    console.log(res);
+    menuPrompt();
+  });
+}
+
+// function to view all roles 
+// function viewRoles() 
+
+
+// function to view all employees 
+// function viewEmployees() {
+//   db.query('select * from employee', (err, res) => {
+//     console.log(err);
+//     console.log(res);
+//     menuPrompt();
+//   });
 // }
 
+// function to add a department 
+// function addDeparment ()
+
+// function to add a role 
+// function addRole ()
+
+// function to add an employee 
+// function addEmployee ()
+
+// function to update employee role 
+// function updateEmployeeRole ()
+
+
+menuPrompt();
+
+
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  console.log(`Server running on port ${PORT}`);
+});
