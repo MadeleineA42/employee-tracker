@@ -42,7 +42,7 @@ function menuPrompt() {
       'Add a department',
       'Add a role',
       'Add an employee',
-      'Update and employee role',
+      'Update an employee role',
       'Exit'
     ]
   }).then(answer => {
@@ -194,10 +194,72 @@ function addRole() {
 
 
 // function to add an employee 
-// function addEmployee ()
+function addEmployee() {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'firstName',
+        message: "Enter the employee's first name:",
+        validate: function(input) {
+          if (input.trim() === '') {
+            return "First name cannot be empty. Please enter a valid name.";
+          }
+          return true;
+        }
+      },
+      {
+        type: 'input',
+        name: 'lastName',
+        message: "Enter the employee's last name:",
+        validate: function(input) {
+          if (input.trim() === '') {
+            return "Last name cannot be empty. Please enter a valid name.";
+          }
+          return true;
+        }
+      },
+      {
+        type: 'input',
+        name: 'roleId',
+        message: "Enter the employee's role ID:",
+        validate: function(input) {
+          if (isNaN(input) || parseInt(input) <= 0) {
+            return "Invalid role ID. Please enter a valid number greater than 0.";
+          }
+          return true;
+        }
+      },
+      {
+        type: 'input',
+        name: 'managerId',
+        message: "Enter the employee's manager's ID (optional, press Enter to skip):",
+        validate: function(input) {
+          if (input.trim() === '') {
+            return true; // Allow empty input for manager ID (indicating no manager)
+          }
+          if (isNaN(input) || parseInt(input) <= 0) {
+            return "Invalid manager ID. Please enter a valid number greater than 0.";
+          }
+          return true;
+        }
+      }
+    ])
+    .then(answer => {
+      const { firstName, lastName, roleId, managerId } = answer;
+      const sql = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)';
+      db.query(sql, [firstName, lastName, roleId, managerId || null], (err, res) => {
+        if (err) throw err;
+        console.log(`Employee "${firstName} ${lastName}" has been added successfully!`);
+        menuPrompt(); // Go back to the main menu after adding the employee
+      });
+    });
+}
+
 
 // function to update employee role 
-// function updateEmployeeRole ()
+// 
+
 
 
 menuPrompt();
