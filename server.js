@@ -60,7 +60,7 @@ function menuPrompt() {
         break;
 
       case 'Add a department':
-        addDeparment();
+        addDepartment();
         break;
 
       case 'Add a role':
@@ -87,30 +87,64 @@ function menuPrompt() {
 // function to view all departments 
 function viewDepartment() {
   db.query('select * from department', (err, res) => {
-    console.log(err);
-    console.log(res);
+    if (err) throw err;
+    console.log('Departments:');
+    console.table(res);
     menuPrompt();
   });
 }
 
 // function to view all roles 
-// function viewRoles() 
+function viewRoles() {
+  db.query('select * from role', (err, res) => {
+    if (err) throw err;
+    console.log('Roles:');
+    console.table(res);
+    menuPrompt();
+  });
+}
 
 
 // function to view all employees 
-// function viewEmployees() {
-//   db.query('select * from employee', (err, res) => {
-//     console.log(err);
-//     console.log(res);
-//     menuPrompt();
-//   });
-// }
+function viewEmployees() {
+  db.query('select * from employee', (err, res) => {
+    if (err) throw err;
+    console.log('Employees:');
+    console.table(res);
+    menuPrompt();
+  });
+}
 
 // function to add a department 
-// function addDeparment ()
+function addDepartment() {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'departmentName',
+        message: 'Enter the name of the new department:',
+        validate: function (input) {
+          if (input.trim() === '') {
+            return 'Department name cannot be empty. Please try again.';
+          }
+          return true;
+        }
+      }
+    ])
+    .then(answer => {
+      const departmentName = answer.departmentName;
+      const sql = 'INSERT INTO department (name) VALUES (?)';
+      db.query(sql, [departmentName], (err, res) => {
+        if (err) throw err;
+        console.log(`Department "${departmentName}" has been added successfully!`);
+        menuPrompt(); // Go back to the main menu after adding the department
+      });
+    });
+}
+
 
 // function to add a role 
-// function addRole ()
+// function addRole () 
 
 // function to add an employee 
 // function addEmployee ()
