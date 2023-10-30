@@ -144,7 +144,54 @@ function addDepartment() {
 
 
 // function to add a role 
-// function addRole () 
+function addRole() {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'title',
+        message: 'Enter the title of the new role:',
+        validate: function(input) {
+          if (input.trim() === '') {
+            return 'Role title cannot be empty. Please enter a valid title.';
+          }
+          return true;
+        }
+      },
+      {
+        type: 'input',
+        name: 'salary',
+        message: 'Enter the salary for the new role:',
+        validate: function(input) {
+          if (isNaN(input) || parseFloat(input) <= 0) {
+            return 'Invalid salary. Please enter a valid number greater than 0.';
+          }
+          return true;
+        }
+      },
+      {
+        type: 'input',
+        name: 'departmentId',
+        message: 'Enter the department ID for the new role: (Must be between 1-4)',
+        validate: function(input) {
+          if (isNaN(input) || parseInt(input) <= 0) {
+            return 'Invalid department ID. Please enter a valid number greater than 0.';
+          }
+          return true;
+        }
+      }
+    ])
+    .then(answer => {
+      const { title, salary, departmentId } = answer;
+      const sql = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
+      db.query(sql, [title, salary, departmentId], (err, res) => {
+        if (err) throw err;
+        console.log(`Role "${title}" has been added successfully!`);
+        menuPrompt(); // Go back to the main menu after adding the role
+      });
+    });
+}
+
 
 // function to add an employee 
 // function addEmployee ()
