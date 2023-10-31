@@ -104,16 +104,31 @@ function viewRoles() {
   });
 }
 
-
-// function to view all employees 
+// function to view all employees along with their roles and salaries
 function viewEmployees() {
-  db.query('select * from employee', (err, res) => {
+  const sql = `
+  SELECT 
+  employee.id,
+  employee.first_name,
+  employee.last_name,
+  title,
+  name AS department,
+  salary
+    FROM employee
+    LEFT JOIN role
+    ON employee.role_id = role.id
+    LEFT JOIN department
+    ON role.department_id = department.id
+    ORDER BY employee.id;`;
+  db.query(sql, (err, result) => {
     if (err) throw err;
-    console.log('Employees:');
-    console.table(res);
+    console.table(result);
     menuPrompt();
   });
 }
+
+
+
 
 // function to add a department 
 function addDepartment() {
@@ -142,54 +157,53 @@ function addDepartment() {
     });
 }
 
+// callback function for department list 
+function getDepartmentChoices(callback) {
+  const sql = 'SELECT id, name FROM department';
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+    const departmentChoices = results.map(department => ({
+      value: department.id,
+      name: department.name
+    }));
+    callback(departmentChoices);
+  });
+}
 
-// function to add a role 
+// function to add a new role 
 function addRole() {
-  inquirer
-    .prompt([
-      {
-        type: 'input',
-        name: 'title',
-        message: 'Enter the title of the new role:',
-        validate: function(input) {
-          if (input.trim() === '') {
-            return 'Role title cannot be empty. Please enter a valid title.';
-          }
-          return true;
+  getDepartmentChoices(departmentChoices => {
+    inquirer
+      .prompt([
+        {
+          type: 'input',
+          name: 'title',
+          message: 'Enter the title of the new role:',
+          
+        },
+        {
+          type: 'input',
+          name: 'salary',
+          message: 'Enter the salary for the new role:',
+          
+        },
+        {
+          type: 'list',
+          name: 'departmentId',
+          message: 'Select the department for the new role:',
+          choices: departmentChoices,
         }
-      },
-      {
-        type: 'input',
-        name: 'salary',
-        message: 'Enter the salary for the new role:',
-        validate: function(input) {
-          if (isNaN(input) || parseFloat(input) <= 0) {
-            return 'Invalid salary. Please enter a valid number greater than 0.';
-          }
-          return true;
-        }
-      },
-      {
-        type: 'input',
-        name: 'departmentId',
-        message: 'Enter the department ID for the new role: (Must be between 1-4)',
-        validate: function(input) {
-          if (isNaN(input) || parseInt(input) <= 0) {
-            return 'Invalid department ID. Please enter a valid number greater than 0.';
-          }
-          return true;
-        }
-      }
-    ])
-    .then(answer => {
-      const { title, salary, departmentId } = answer;
-      const sql = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
-      db.query(sql, [title, salary, departmentId], (err, res) => {
-        if (err) throw err;
-        console.log(`Role "${title}" has been added successfully!`);
-        menuPrompt(); // Go back to the main menu after adding the role
+      ])
+      .then(answer => {
+        const { title, salary, departmentId } = answer;
+        const sql = 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)';
+        db.query(sql, [title, salary, departmentId], (err, res) => {
+          if (err) throw err;
+          console.log(`Role "${title}" has been added successfully!`);
+          menuPrompt(); // Go back to the main menu after adding the role
+        });
       });
-    });
+  });
 }
 
 
@@ -200,8 +214,8 @@ function addEmployee() {
       {
         type: 'input',
         name: 'firstName',
-        message: "Enter the employee's first name:",
-        validate: function(input) {
+        message: "Enter the employee's FIRST name:",
+        validate: function (input) {
           if (input.trim() === '') {
             return "First name cannot be empty. Please enter a valid name.";
           }
@@ -211,8 +225,8 @@ function addEmployee() {
       {
         type: 'input',
         name: 'lastName',
-        message: "Enter the employee's last name:",
-        validate: function(input) {
+        message: "Enter the employee's LAST name:",
+        validate: function (input) {
           if (input.trim() === '') {
             return "Last name cannot be empty. Please enter a valid name.";
           }
@@ -222,8 +236,8 @@ function addEmployee() {
       {
         type: 'input',
         name: 'roleId',
-        message: "Enter the employee's role ID:",
-        validate: function(input) {
+        message: "Enter the employee's role ID (1-8):",
+        validate: function (input) {
           if (isNaN(input) || parseInt(input) <= 0) {
             return "Invalid role ID. Please enter a valid number greater than 0.";
           }
@@ -233,10 +247,10 @@ function addEmployee() {
       {
         type: 'input',
         name: 'managerId',
-        message: "Enter the employee's manager's ID (optional, press Enter to skip):",
-        validate: function(input) {
+        message: "Enter the employee's manager's ID 1-4 (optional, press Enter to skip):",
+        validate: function (input) {
           if (input.trim() === '') {
-            return true; // Allow empty input for manager ID (indicating no manager)
+            return true; // Allow empty input for manager ID (null id)
           }
           if (isNaN(input) || parseInt(input) <= 0) {
             return "Invalid manager ID. Please enter a valid number greater than 0.";
@@ -258,9 +272,60 @@ function addEmployee() {
 
 
 // function to update employee role 
-// 
-
-
+function updateEmployeeRole() {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'firstName',
+        message: "Enter the employee's first name:",
+        validate: function (input) {
+          if (input.trim() === '') {
+            return "First name cannot be empty. Please enter a valid name.";
+          }
+          return true;
+        }
+      },
+      {
+        type: 'input',
+        name: 'lastName',
+        message: "Enter the employee's last name:",
+        validate: function (input) {
+          if (input.trim() === '') {
+            return "Last name cannot be empty. Please enter a valid name.";
+          }
+          return true;
+        }
+      },
+      {
+        type: 'input',
+        name: 'newTitle',
+        message: 'Enter the new role title for the employee:',
+        validate: function (input) {
+          if (input.trim() === '') {
+            return 'Role title cannot be empty. Please enter a valid title.';
+          }
+          return true;
+        }
+      }
+    ])
+    .then(answer => {
+      const { firstName, lastName, newTitle } = answer;
+      const sql = `UPDATE employee e
+                   JOIN role r ON e.role_id = r.id
+                   SET r.title = ?
+                   WHERE e.first_name = ? AND e.last_name = ?`;
+      db.query(sql, [newTitle, firstName, lastName], (err, res) => {
+        if (err) throw err;
+        if (res.affectedRows > 0) {
+          console.log(`Employee ${firstName} ${lastName}'s role has been updated to "${newTitle}" successfully!`);
+        } else {
+          console.log(`No employee found with the given name. Please check the name and try again.`);
+        }
+        menuPrompt(); // Go back to the main menu after updating the employee's role title
+      });
+    });
+}
 
 menuPrompt();
 

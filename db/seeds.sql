@@ -20,6 +20,6 @@ VALUES ("Demonologist", 100000, 1),
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES
     ('Mary', 'Shelley', 1, 4),
-    ('Shirley', 'Jackson', 2, 3),
-    ('Sabrina', 'Spellman', 3, 2),
-    ('Elle', 'Vira', 4, 1);
+    ('Shirley', 'Jackson', 3, 2),
+    ('Sabrina', 'Spellman', 5, 3),
+    ('Elle', 'Vira', 7, 1);
