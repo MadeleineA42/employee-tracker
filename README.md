@@ -26,6 +26,7 @@ THEN I am prompted to select an employee to update and their new role and this i
 
 
 ## Mockup
-
+<img src="images/Screenshot 2023-10-31 at 1.17.25 PM.png">
 
 ## Walkthrough Video Link
+Click <a href="https://drive.google.com/file/d/17LKtRY-hflW7UNe0wu-FgSopfhfbbO2h/view">HERE</a> to view walkthrough video.

@@ -127,9 +127,6 @@ function viewEmployees() {
   });
 }
 
-
-
-
 // function to add a department 
 function addDepartment() {
   inquirer
@@ -206,70 +203,66 @@ function addRole() {
   });
 }
 
+// callback function to list roles for addEmployee function 
+function getRoleChoices(callback) {
+  const sql = 'SELECT id, title FROM role';
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+    const roleChoices = results.map(role => ({
+      value: role.id,
+      name: role.title
+    }));
+    callback(roleChoices);
+  });
+}
 
 // function to add an employee 
 function addEmployee() {
-  inquirer
-    .prompt([
-      {
-        type: 'input',
-        name: 'firstName',
-        message: "Enter the employee's FIRST name:",
-        validate: function (input) {
-          if (input.trim() === '') {
-            return "First name cannot be empty. Please enter a valid name.";
+  getRoleChoices(roleChoices => {
+    inquirer
+      .prompt([
+        {
+          type: 'input',
+          name: 'firstName',
+          message: "Enter the employee's FIRST name:",
+        },
+        {
+          type: 'input',
+          name: 'lastName',
+          message: "Enter the employee's LAST name:",
+        },
+        {
+          type: 'list',
+          name: 'roleId',
+          message: "Select the employee's role:",
+          choices: roleChoices,
+        },
+        {
+          type: 'input',
+          name: 'managerId',
+          message: "Enter the employee's manager's ID 1-4 (optional, press Enter to skip):",
+          validate: function (input) {
+            if (input.trim() === '') {
+              return true; // Allow empty input for manager ID (null id)
+            }
+            if (isNaN(input) || parseInt(input) <= 0) {
+              return "Invalid manager ID. Please enter a valid number greater than 0.";
+            }
+            return true;
           }
-          return true;
         }
-      },
-      {
-        type: 'input',
-        name: 'lastName',
-        message: "Enter the employee's LAST name:",
-        validate: function (input) {
-          if (input.trim() === '') {
-            return "Last name cannot be empty. Please enter a valid name.";
-          }
-          return true;
-        }
-      },
-      {
-        type: 'input',
-        name: 'roleId',
-        message: "Enter the employee's role ID (1-8):",
-        validate: function (input) {
-          if (isNaN(input) || parseInt(input) <= 0) {
-            return "Invalid role ID. Please enter a valid number greater than 0.";
-          }
-          return true;
-        }
-      },
-      {
-        type: 'input',
-        name: 'managerId',
-        message: "Enter the employee's manager's ID 1-4 (optional, press Enter to skip):",
-        validate: function (input) {
-          if (input.trim() === '') {
-            return true; // Allow empty input for manager ID (null id)
-          }
-          if (isNaN(input) || parseInt(input) <= 0) {
-            return "Invalid manager ID. Please enter a valid number greater than 0.";
-          }
-          return true;
-        }
-      }
-    ])
-    .then(answer => {
-      const { firstName, lastName, roleId, managerId } = answer;
-      const sql = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)';
-      db.query(sql, [firstName, lastName, roleId, managerId || null], (err, res) => {
-        if (err) throw err;
-        console.log(`Employee "${firstName} ${lastName}" has been added successfully!`);
-        menuPrompt(); // Go back to the main menu after adding the employee
+      ])
+      .then(answer => {
+        const { firstName, lastName, roleId, managerId } = answer;
+        const sql = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)';
+        db.query(sql, [firstName, lastName, roleId, managerId || null], (err, res) => {
+          if (err) throw err;
+          console.log(`Employee "${firstName} ${lastName}" has been added successfully!`);
+          menuPrompt(); // Go back to the main menu after adding the employee
+        });
       });
-    });
+  });
 }
-
 
 // function to update employee role 
 function updateEmployeeRole() {
@@ -333,3 +326,5 @@ menuPrompt();
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+
